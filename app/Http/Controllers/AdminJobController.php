@@ -6,6 +6,17 @@ use Illuminate\Http\Request;
 
 class AdminJobController extends Controller
 {
+    public function dashboard()
+    {
+        $totalJobs = \App\Models\Job::count();
+        $pendingJobs = \App\Models\Job::where('status', 'pending')->count();
+        $approvedJobs = \App\Models\Job::where('status', 'approved')->count();
+        $rejectedJobs = \App\Models\Job::where('status', 'rejected')->count();
+        $recentJobs = \App\Models\Job::with('user')->latest()->take(5)->get();
+        
+        return view('admin.dashboard', compact('totalJobs', 'pendingJobs', 'approvedJobs', 'rejectedJobs', 'recentJobs'));
+    }
+
     public function index()
     {
         $jobs = \App\Models\Job::with('user')->latest()->get();
@@ -15,7 +26,7 @@ class AdminJobController extends Controller
     public function approve($id)
     {
         $job = \App\Models\Job::findOrFail($id);
-        $job->status = 'Approved';
+        $job->status = 'approved';
         $job->save();
         return back()->with('success', 'Job approved successfully.');
     }
@@ -23,7 +34,7 @@ class AdminJobController extends Controller
     public function reject($id)
     {
         $job = \App\Models\Job::findOrFail($id);
-        $job->status = 'Rejected';
+        $job->status = 'rejected';
         $job->save();
         return back()->with('success', 'Job rejected successfully.');
     }
@@ -43,10 +54,10 @@ class AdminJobController extends Controller
             return back()->with('error', 'No jobs selected.');
         }
         if ($action === 'approve') {
-            \App\Models\Job::whereIn('id', $ids)->update(['status' => 'Approved']);
+            \App\Models\Job::whereIn('id', $ids)->update(['status' => 'approved']);
             return back()->with('success', 'Selected jobs approved.');
         } elseif ($action === 'reject') {
-            \App\Models\Job::whereIn('id', $ids)->update(['status' => 'Rejected']);
+            \App\Models\Job::whereIn('id', $ids)->update(['status' => 'rejected']);
             return back()->with('success', 'Selected jobs rejected.');
         } elseif ($action === 'delete') {
             \App\Models\Job::whereIn('id', $ids)->delete();

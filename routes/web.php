@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function() {
 // Admin Routes
 Route::middleware(['auth', IsAdmin::class])->group(function() {
     Route::prefix('admin')->name('admin.')->controller(AdminJobController::class)->group(function() {
+        Route::get('/', 'dashboard')->name('dashboard');
         Route::get('/jobs', 'index')->name('jobs.index');
         Route::post('/jobs/bulk-action', 'bulkAction')->name('jobs.bulk-action')
             ->middleware('throttle:10,1');
